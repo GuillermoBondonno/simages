@@ -1,0 +1,7 @@
+.env
+*.pyc
+__pycache__
+.mypy*
+.pyt*
+.vs*
+.ipynb_c*

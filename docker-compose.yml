@@ -1,0 +1,33 @@
+version: "3.7"
+
+services:
+    webservice:
+        build: .
+        image: simages
+        container_name: simages
+        volumes:
+            - .:/server
+        env_file:
+            - ./.env
+        command: bash -c "python run.py"
+        restart: always
+        ports:
+            - 8094:8094
+        dns:
+            - 8.8.8.8
+            - 4.4.4.4
+    frontend:
+        build: .
+        image: simages-frontend
+        container_name: simages-frontend
+        volumes:
+            - .:/server
+        env_file:
+            - ./.env
+        command: bash -c "cd frontend && python -m http.server 8093"
+        restart: always
+        ports:
+            - 8093:8093
+        dns:
+            - 8.8.8.8
+            - 4.4.4.4
