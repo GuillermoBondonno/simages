@@ -14,10 +14,8 @@ router = APIRouter()
 demo_path = "./demo_data/S2B_MSIL2A_20210826T135019_N0301_R024_T21HUB_20210826T181340.SAFE/GRANULE/L2A_T21HUB_A023359_20210826T135327/IMG_DATA/R10m"
 
 
-# upper_left_lng/{upper_left_lng}/upper_left_lat/{upper_left_lat}/bottom_right_lng/{bottom_right_lng}/bottom_right_lat/{bottom_right_lat}")
 @router.get("/ulx/{upper_left_lng}/uly/{upper_left_lat}/brx/{bottom_right_lng}/bry/{bottom_right_lat}")
 async def load_from_demo(upper_left_lng: float, upper_left_lat: float, bottom_right_lng: float, bottom_right_lat: float) -> JSONResponse:
-    # testing de abajo funciona perfecto
     """
     #### Demo endpoint to calculate en display NDVI index around Buenos Aires metropolitan area
     ##### example: 
@@ -28,7 +26,6 @@ async def load_from_demo(upper_left_lng: float, upper_left_lat: float, bottom_ri
     """
     start = time.time()
 
-    print(f"\n\n Called the endpoint {time.time()-start}", flush=True)
     red_band_path = demo_path+"/T21HUB_20210826T135019_B04_10m.jp2"
     nir_band_path = demo_path+"/T21HUB_20210826T135019_B08_10m.jp2"
 
@@ -47,16 +44,13 @@ async def load_from_demo(upper_left_lng: float, upper_left_lat: float, bottom_ri
     if red_band == False:
         return JSONResponse(status_code=400,
                             content="Input area outside band surface area")
-    print(f"Read and clip red_band {time.time()-start}", flush=True)
 
     nir_band = read_and_clip_band(nir_band_path, area_of_interest)
-    print(f"Read and clip nir_band {time.time()-start}", flush=True)
 
     # Assume that if data is found in red_band, it will also be found in nir_band
 
     ndvi_array = calculate_ndvi(red_band, nir_band)
 
-    print(f"Calculated ndvi index {time.time()-start}", flush=True)
     # assume 0 values are water and urban
     NDVI_index = round(np.average(ndvi_array[ndvi_array != 0]), 3)
 
@@ -64,10 +58,7 @@ async def load_from_demo(upper_left_lng: float, upper_left_lat: float, bottom_ri
     colormapped_array = np.array([[red_to_green_colormap[value]
                                    for value in line] for line in ndvi_array])
 
-# https://stackoverflow.com/questions/59760739/how-do-i-return-a-dict-an-image-from-a-fastapi-endpoint
     res, im_png = cv2.imencode(".png", colormapped_array)
 
-    print(
-        f"\n\n {'###'*100}Total time since the start: {time.time()-start}", flush=True)
     return StreamingResponse(io.BytesIO(im_png.tobytes()), media_type="image/png", headers={"ndvi": str(NDVI_index),
                                                                                             "last_updated": last_updated})

@@ -1,9 +1,9 @@
+from routers import demo_area
 import uvicorn
 from fastapi import FastAPI
 from starlette.responses import RedirectResponse
-from routers import demo_area
 from fastapi.middleware.cors import CORSMiddleware
-
+import sys
 
 app = FastAPI(
     title="simages",
@@ -38,5 +38,5 @@ app.include_router(
 
 
 if __name__ == "__main__":
-    uvicorn.run("run:app", host="0.0.0.0", port=8094,
+    uvicorn.run("run:app", host="0.0.0.0", port=5000,
                 debug=True, log_level="info")
